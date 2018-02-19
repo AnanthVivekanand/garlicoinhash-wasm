@@ -77,6 +77,28 @@ void SumScryptN(const Nan::FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(Nan::NewBuffer(output, 32).ToLocalChecked());
 }
 
+void SumAllium(const Nan::FunctionCallbackInfo<Value>& args) {
+ 
+  if(args.Length() < 1) {
+    Nan::ThrowTypeError("1 argument expected");
+    return;
+  }  
+
+  Local<Object> target = args[0]->ToObject();
+
+  if(!node::Buffer::HasInstance(target)) {
+    Nan::ThrowTypeError("Function expects buffer as input");
+    return;
+  }
+
+  char* input = node::Buffer::Data(target);
+  char* output = new char[32];
+
+  allium_hash(input, output);
+  
+  args.GetReturnValue().Set(Nan::NewBuffer(output, 32).ToLocalChecked());
+}
+
 void Init(v8::Local<v8::Object> exports) {
   exports->Set(Nan::New("SumLyra2REv2").ToLocalChecked(),
                Nan::New<v8::FunctionTemplate>(SumLyra2REv2)->GetFunction());
@@ -84,6 +106,8 @@ void Init(v8::Local<v8::Object> exports) {
                Nan::New<v8::FunctionTemplate>(SumLyra2RE)->GetFunction());
   exports->Set(Nan::New("SumScryptN").ToLocalChecked(),
                Nan::New<v8::FunctionTemplate>(SumScryptN)->GetFunction());
+  exports->Set(Nan::New("SumAllium").ToLocalChecked(),
+               Nan::New<v8::FunctionTemplate>(SumAllium)->GetFunction());
 }
 
-NODE_MODULE(vertcoinhash, Init) 
+NODE_MODULE(garlicoinhash, Init) 
