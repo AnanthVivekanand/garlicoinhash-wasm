@@ -27,18 +27,24 @@
  * online backup system.
  */
 
+#include <emscripten.h>
+
 #include "Lyra2RE.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include "sha3/sph_blake.h"
-#include "sha3/sph_groestl.h"
-#include "sha3/sph_cubehash.h"
-#include "sha3/sph_bmw.h"
-#include "sha3/sph_keccak.h"
-#include "sha3/sph_skein.h"
-#include "Lyra2.h"
+#include "crypto/sha3/sph_blake.h"
+#include "crypto/sha3/sph_groestl.h"
+#include "crypto/sha3/sph_cubehash.h"
+#include "crypto/sha3/sph_bmw.h"
+#include "crypto/sha3/sph_keccak.h"
+#include "crypto/sha3/sph_skein.h"
+#include "crypto/Lyra2.h"
+
+EMSCRIPTEN_KEEPALIVE
+
+int main(int argc, char ** argv) {}
 
 void allium_hash(const char* input, char* state)
 {
