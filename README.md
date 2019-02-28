@@ -1,13 +1,16 @@
-# garlicoinhash
+# garlicoinhash-wasm
 
-Garlicoinhash is a Node.js native module for Garlicoin proof of work functions. It provides methods for Lyra2RE, Lyra2REv2 and Scrypt-N(2048).
+Provides WebAssembly code to hash strings using the Allium energy-efficient hashing function.
 
 ## Usage
 
-    var garlicoinhash = require('garlicoinhash');
-
-    var buf = Buffer.from('700000005d385ba114d079971b29a9418fd0549e7d68a95c7f168621a314201000000000578586d149fd07b22f3a8a347c516de7052f034d2b76ff68e0d6ecff9b77a45489e3fd511732011df0731000', 'hex');
-
-    console.log(garlicoinhash.SumLyra2REv2(buf));
-    console.log(garlicoinhash.SumLyra2RE(buf));
-    console.log(garlicoinhash.SumScryptN(buf));
+    importScripts('./allium.js');
+    Module.onRuntimeInitialized = function() {
+        var heap = Module.HEAPU8.buffer;
+        var header = new Uint8Array(heap, Module._malloc(80), 80);
+        var output = new Uint8Array(heap, Module._malloc(32), 32);
+        header.set(hex2Buf( data )); Or set another buffer to the Uint8Array
+        Module.ccall("allium_hash", "string", [], [header.byteOffset, output.byteOffset]);
+        console.log(buf2Hex(output));
+    }
+        
