@@ -153,3 +153,69 @@ void lyra2re2_hash(const char* input, char* output)
     
    	memcpy(output, hashA, 32);
 }
+
+static inline void be32enc(void *pp, uint32_t x)
+{
+	uint8_t *p = (uint8_t *)pp;
+	p[3] = x & 0xff;
+	p[2] = (x >> 8) & 0xff;
+	p[1] = (x >> 16) & 0xff;
+	p[0] = (x >> 24) & 0xff;
+}
+
+
+
+bool fulltest(const uint32_t *hash, const uint32_t *target)
+{
+	int i;
+	bool rc = true;
+	
+	for (i = 7; i >= 0; i--) {
+		if (hash[i] > target[i]) {
+			rc = false;
+			break;
+		}
+		if (hash[i] < target[i]) {
+			rc = true;
+			break;
+		}
+	}
+
+	return rc;
+}
+
+
+int scanhash_allium(int thr_id, struct work *work, uint32_t max_nonce, uint64_t *hashes_done)
+{
+	uint32_t _ALIGN(128) hash[8];
+	uint32_t _ALIGN(128) endiandata[20];
+	uint32_t *pdata = work->data;
+	uint32_t *ptarget = work->target;
+
+	const uint32_t Htarg = ptarget[7];
+	const uint32_t first_nonce = pdata[19];
+	uint32_t n = first_nonce;
+
+	for (int i=0; i < 19; i++) {
+		be32enc(&endiandata[i], pdata[i]);
+	}
+
+	do {
+		be32enc(&endiandata[19], n);
+		allium_hash(hash, endiandata);
+
+		if (hash[7] < Htarg && fulltest(hash, ptarget)) {
+			//work_set_target_ratio(work, hash);
+			*hashes_done = n - first_nonce + 1;
+			pdata[19] = n;
+			return 1;
+		}
+		n++;
+
+	} while (n < max_nonce);
+
+	*hashes_done = n - first_nonce + 1;
+	pdata[19] = n;
+
+	return 0;
+}
